@@ -1,100 +1,111 @@
 "use client";
 
-/**
- * CtaSlide — closing card promoting Gameweek XI.
- * No wrappedData needed.
- */
+import GWLogo from "@/components/GWLogo";
+
 export default function CtaSlide() {
   return (
-    <div className="relative flex flex-col justify-between bg-[var(--black)] min-h-[70vh] p-6 overflow-hidden select-none">
-
-      {/* Halftone on dark background */}
+    <div
+      className="relative flex flex-col justify-between min-h-[70vh] p-6 overflow-hidden select-none"
+      style={{ backgroundColor: "var(--gw-dark)" }}
+    >
+      {/* Teal halftone dot background */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-10"
+        className="absolute inset-0 pointer-events-none opacity-[0.06]"
         style={{
-          backgroundImage: "radial-gradient(circle, #F5EDD6 1px, transparent 1px)",
-          backgroundSize: "6px 6px",
+          backgroundImage: "radial-gradient(circle, #00FFC2 1px, transparent 1px)",
+          backgroundSize: "8px 8px",
         }}
       />
 
-      {/* ── HEADER ── */}
-      <div className="relative z-10 flex items-start justify-between">
-        <p className="font-[family-name:var(--font-mono)] text-[var(--cream)] opacity-50 text-[0.55rem] uppercase tracking-[0.3em]">
-          Next Season Starts Now
-        </p>
-        <div className="border border-dashed border-[var(--cream)] px-2 py-0.5 opacity-40">
-          <p className="font-[family-name:var(--font-mono)] text-[var(--cream)] text-[0.45rem] uppercase tracking-widest">
+      {/* Teal glow bloom — top right */}
+      <div
+        className="absolute -top-10 -right-10 w-48 h-48 rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, #00FFC222 0%, transparent 70%)" }}
+      />
+
+      {/* ── TOP ROW: 2025/26 badge ── */}
+      <div className="relative z-10 flex justify-end">
+        <div
+          className="border border-dashed px-2 py-0.5 opacity-40"
+          style={{ borderColor: "var(--gw-teal)" }}
+        >
+          <p
+            className="text-[0.45rem] uppercase tracking-widest"
+            style={{ fontFamily: "var(--font-mono)", color: "var(--gw-teal)" }}
+          >
             2025 / 26
           </p>
         </div>
       </div>
 
-      {/* ── HERO HEADLINE ── */}
-      <div className="relative z-10 flex flex-col gap-3 my-6">
-        <h2
-          className="font-[family-name:var(--font-display)] text-[var(--cream)] leading-none tracking-wide"
-          style={{ fontSize: "clamp(3rem, 16vw, 4.5rem)" }}
+      {/* ── CENTRE: Logo + brand name ── */}
+      <div className="relative z-10 flex flex-col items-center gap-3 mt-4">
+        <GWLogo size={64} />
+        <p
+          className="uppercase tracking-[0.3em] font-bold text-sm"
+          style={{ fontFamily: "var(--font-brand)", color: "var(--gw-teal)" }}
         >
-          PLAY GAMEWEEK XI
-        </h2>
-        <div className="w-16 h-1 bg-[var(--red)]" />
-        <p className="font-[family-name:var(--font-mono)] text-[var(--cream)] opacity-70 text-sm leading-relaxed max-w-xs">
-          The ultimate companion app for Fantasy Premier League managers.
-          Live scores, captain alerts, and squad tools — all in one place.
+          Gameweek XI
         </p>
       </div>
 
-      {/* ── DIVIDER ── */}
-      <hr className="relative z-10 border-none border-t-2 border-dashed border-[var(--cream)] opacity-20 my-0" />
+      {/* ── HEADLINE + SUBHEADING ── */}
+      <div className="relative z-10 flex flex-col gap-3 mt-6">
+        <h2
+          className="leading-none tracking-wide"
+          style={{
+            fontFamily: "var(--font-display)",
+            color: "var(--gw-teal)",
+            fontSize: "clamp(2.2rem, 12vw, 3.2rem)",
+          }}
+        >
+          ENJOYED RELIVING THE SEASON?
+        </h2>
 
-      {/* ── CTA BUTTONS ── */}
-      <div className="relative z-10 flex flex-col gap-3 my-6">
+        <div className="w-12 h-[2px]" style={{ backgroundColor: "var(--gw-teal)" }} />
+
+        <p
+          className="text-sm leading-relaxed opacity-80"
+          style={{ fontFamily: "var(--font-brand)", color: "var(--gw-teal-dim)" }}
+        >
+          Feel alive all season on Gameweek XI
+        </p>
+      </div>
+
+      {/* ── CTA BUTTON ── */}
+      <div className="relative z-10 mt-6">
         <a
-          href="https://apps.apple.com"
+          href="https://gameweekxi.com/"
           target="_blank"
           rel="noopener noreferrer"
-          className="
-            flex items-center justify-center gap-3
-            border-2 border-[var(--cream)] bg-transparent
-            px-4 py-3
-            font-[family-name:var(--font-mono)] text-[var(--cream)]
-            text-xs uppercase tracking-widest
-            hover:bg-[var(--cream)] hover:text-[var(--black)]
-            transition-colors duration-150
-          "
+          className="flex items-center justify-center w-full px-6 py-4 border-2 transition-all duration-150 group"
+          style={{ borderColor: "var(--gw-teal)" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--gw-teal)";
+            e.currentTarget.querySelector("span").style.color = "var(--gw-dark)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.querySelector("span").style.color = "var(--gw-teal)";
+          }}
         >
-          <span aria-hidden="true">&#63743;</span>
-          App Store
-        </a>
-        <a
-          href="https://play.google.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="
-            flex items-center justify-center gap-3
-            border-2 border-[var(--cream)] bg-transparent
-            px-4 py-3
-            font-[family-name:var(--font-mono)] text-[var(--cream)]
-            text-xs uppercase tracking-widest
-            hover:bg-[var(--cream)] hover:text-[var(--black)]
-            transition-colors duration-150
-          "
-        >
-          <span aria-hidden="true">▶</span>
-          Google Play
+          <span
+            className="font-semibold text-sm uppercase tracking-widest transition-colors duration-150"
+            style={{ fontFamily: "var(--font-brand)", color: "var(--gw-teal)" }}
+          >
+            Download Now
+          </span>
         </a>
       </div>
 
       {/* ── FOOTER: URL ── */}
-      <div className="relative z-10 flex items-center justify-between">
-        <p className="font-[family-name:var(--font-display)] text-[var(--cream)] text-xl tracking-widest opacity-80">
-          GAMEWEEKXI.COM
+      <div className="relative z-10 mt-4 flex justify-center">
+        <p
+          className="text-xs tracking-widest opacity-50"
+          style={{ fontFamily: "var(--font-mono)", color: "var(--gw-teal)" }}
+        >
+          gameweekxi.com
         </p>
-        <div className="border border-dashed border-[var(--red)] px-2 py-1">
-          <p className="font-[family-name:var(--font-stamp)] text-[var(--red)] text-[0.6rem] uppercase tracking-wider">
-            FREE
-          </p>
-        </div>
       </div>
     </div>
   );

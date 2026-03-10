@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import GWLogo from "@/components/GWLogo";
 
 export default function Home() {
   const [teamId, setTeamId] = useState("");
@@ -32,7 +33,7 @@ export default function Home() {
           <h1 className="font-[family-name:var(--font-display)] text-[var(--black)] text-8xl leading-none tracking-wide">
             FPL
           </h1>
-          <h1 className="font-[family-name:var(--font-display)] text-[var(--red)] text-8xl leading-none tracking-wide">
+          <h1 className="font-[family-name:var(--font-display)] text-[var(--gw-teal)] text-8xl leading-none tracking-wide">
             WRAPPED
           </h1>
         </div>
@@ -95,6 +96,14 @@ export default function Home() {
         <hr className="dashed-separator" />
         <p className="font-[family-name:var(--font-mono)] text-[var(--faded-ink)] text-[0.6rem] uppercase tracking-widest text-center">
           Not affiliated with the Premier League or FPL
+        </p>
+      </div>
+
+      {/* GWLogo — bottom-right corner */}
+      <div className="absolute bottom-5 right-5 z-10 flex items-center gap-2 opacity-70">
+        <GWLogo size={28} />
+        <p className="font-[family-name:var(--font-mono)] text-[var(--faded-ink)] text-[0.55rem] uppercase tracking-widest">
+          by Gameweek XI
         </p>
       </div>
     </main>

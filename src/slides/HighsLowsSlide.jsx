@@ -106,15 +106,15 @@ export default function HighsLowsSlide({ season }) {
 
       <hr className="relative z-10 dashed-separator" />
 
-      {/* ── FOOTER: Swing stat ── */}
+      {/* ── FOOTER: Avg points per GW ── */}
       <div className="relative z-10 flex items-center justify-between">
         <p className="font-[family-name:var(--font-mono)] text-[var(--faded-ink)] text-[0.55rem] uppercase tracking-widest">
-          Points swing
+          Avg points per GW
         </p>
         <p className="font-[family-name:var(--font-display)] text-[var(--black)] text-2xl leading-none tracking-wide">
-          {bestGW.points - worstGW.points}{" "}
+          {(season.rankJourney.reduce((sum, gw) => sum + gw.points, 0) / season.rankJourney.length).toFixed(1)}{" "}
           <span className="font-[family-name:var(--font-mono)] text-[var(--faded-ink)] text-xs">
-            pts
+            pts avg
           </span>
         </p>
       </div>

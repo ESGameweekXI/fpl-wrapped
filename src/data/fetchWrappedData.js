@@ -69,8 +69,12 @@ function determineManagerType({ season, transfers, chips, picksData, bootstrap }
     gwPoints.reduce((sum, p) => sum + Math.pow(p - meanPoints, 2), 0) / gwPoints.length
   );
 
-  // Chips used in first half of season (GW ≤ 19)
-  const earlyChips = chips.filter((c) => c.gw <= 19).length;
+  // Perfect Timer: sum of above-average ratio for each chip GW
+  // (how far each chip GW exceeded the manager's personal season average)
+  const perfectTimerScore = chips.reduce((sum, c) => {
+    if (c.pointsScored <= meanPoints) return sum;
+    return sum + (c.pointsScored - meanPoints) / meanPoints;
+  }, 0);
 
   // Longest consecutive rank-worsening streak
   const ranks = season.rankJourney.map((gw) => gw.rank);
@@ -96,39 +100,46 @@ function determineManagerType({ season, transfers, chips, picksData, bootstrap }
     return g.points >= threshold;
   });
 
+  const topPct = Math.ceil(season.percentile);
+
   const archetypes = [
     {
       label: "The Template Merchant",
       description:
-        "You played it safe all season — high-ownership picks, predictable captains. Reliable but rarely exciting.",
+        `${season.totalPoints.toLocaleString()} points from safe picks and template captains. You never strayed far from the consensus — and it paid off. Reliable, steady, rarely surprised.`,
       traits: ["Consistent", "Risk-averse", "Reliable"],
       score: (avgOwnership > 25 ? 2 : 0) + (avgCaptainOwnership > 30 ? 2 : 0),
     },
     {
       label: "The Differential Hunter",
       description:
-        "Low-owned picks and bold calls defined your season. Big swings, big variance — you lived on the edge.",
+        `Low-owned picks, bold captains, and a season of wild swings. ${season.bestGW.points} points one week, ${season.worstGW.points} another. You lived on the edge — and you wouldn't have it any other way.`,
       traits: ["Bold", "High-variance", "Contrarian"],
       score: (avgOwnership < 15 ? 2 : 0) + (stdDev > 25 ? 2 : 0),
     },
     {
-      label: "The Chip Blaster",
+      label: "The Perfect Timer",
       description:
-        "You loaded your chips early and hoped for the best. Patience was never really your thing.",
-      traits: ["Impatient", "Chip-heavy", "Optimistic"],
-      score: earlyChips >= 3 ? 4 : earlyChips >= 2 ? 2 : 0,
+        `When you played your chips, you picked your moments. Every weapon deployed counted — and your ${season.totalPoints.toLocaleString()} points reflect that clinical timing.`,
+      traits: ["Clinical", "Patient", "Calculated"],
+      score:
+        perfectTimerScore >= 1.5 ? 4
+        : perfectTimerScore >= 0.75 ? 3
+        : perfectTimerScore >= 0.3 ? 2
+        : perfectTimerScore > 0 ? 1
+        : 0,
     },
     {
       label: "The Patient Builder",
       description:
-        "Fewer than 30 transfers, barely a hit taken. You trusted your squad and let it ride all season.",
+        `${transfers.totalMade} transfers all season${transfers.totalHits > 0 ? `, ${transfers.totalHits} hit${transfers.totalHits > 1 ? "s" : ""} taken` : ", clean sheet on hits"}. You backed your squad, kept your nerve, and finished rank ${season.finalRank.toLocaleString()}.`,
       traits: ["Patient", "Disciplined", "Frugal"],
       score: (transfers.totalMade < 30 ? 3 : 0) + (transfers.totalHits < 3 ? 1 : 0),
     },
     {
       label: "The Trigger-Happy Gaffer",
       description:
-        "40+ transfers and counting. Every blank week had you reaching for the app. The market was your playground.",
+        `${transfers.totalMade} transfers and ${transfers.totalHits} hit${transfers.totalHits !== 1 ? "s" : ""} — that's ${Math.abs(transfers.netPoints)} points in deductions. The market was your playground, for better and worse.`,
       traits: ["Active", "Reactionary", "Restless"],
       score:
         (transfers.totalMade >= 40 ? 2 : transfers.totalMade >= 35 ? 1 : 0) +
@@ -137,21 +148,21 @@ function determineManagerType({ season, transfers, chips, picksData, bootstrap }
     {
       label: "The Captain Gambler",
       description:
-        "Over half your armband choices were low-ownership differentials. Sometimes genius, often agony.",
+        `More than half your armbands went on low-owned picks. Bold calls, real consequences. At ${season.totalPoints.toLocaleString()} points you made it work more often than not.`,
       traits: ["Brave", "Contrarian", "High-risk"],
       score: lowOwnershipCaptainPct > 0.5 ? 4 : lowOwnershipCaptainPct > 0.3 ? 2 : 0,
     },
     {
       label: "The Nearly Man",
       description:
-        "Top 20% for most of the season, then one catastrophic stretch undid months of careful work.",
+        `Top ${topPct}% and rank ${season.finalRank.toLocaleString()} — a genuine contender. But that ${maxDropStreak}-gameweek slide still stings. So close to something special.`,
       traits: ["Consistent", "Unlucky", "Resilient"],
       score: (season.percentile <= 20 ? 2 : 0) + (maxDropStreak >= 5 ? 2 : 0),
     },
     {
       label: "The Glass Half Full",
       description:
-        "The overall rank didn't reflect your potential. That one legendary gameweek? Absolutely elite.",
+        `Rank ${season.finalRank.toLocaleString()} doesn't tell the full story. That ${season.bestGW.points}-point gameweek was genuinely elite. The ceiling was always there — just inconsistently.`,
       traits: ["Optimistic", "Inconsistent", "Explosive"],
       score: (season.percentile > 50 ? 2 : 0) + (hadExceptionalGW ? 2 : 0),
     },
@@ -267,8 +278,20 @@ export default async function fetchWrappedData(teamId) {
   const bestCapGW = captainStats.reduce((best, g) =>
     g.captainPoints > best.captainPoints ? g : best
   );
-  const worstCapGW = captainStats.reduce((worst, g) =>
-    g.captainPoints < worst.captainPoints ? g : worst
+
+  // Exclude 0-point captains (armband passed to vice — player didn't play)
+  const playingCaptainStats = captainStats.filter((g) => g.captainPoints > 0);
+  const worstCapGW = (playingCaptainStats.length > 0 ? playingCaptainStats : captainStats).reduce(
+    (worst, g) => (g.captainPoints < worst.captainPoints ? g : worst)
+  );
+
+  // Most captained player across all GWs
+  const captainCounts = {};
+  for (const g of captainStats) {
+    captainCounts[g.captainId] = (captainCounts[g.captainId] || 0) + 1;
+  }
+  const [mostCaptainedId, mostCaptainedTimes] = Object.entries(captainCounts).reduce(
+    (top, entry) => (entry[1] > top[1] ? entry : top)
   );
 
   const captaincy = {
@@ -285,6 +308,10 @@ export default async function fetchWrappedData(teamId) {
       gw: worstCapGW.gw,
       points: worstCapGW.captainPoints,
     },
+    mostCaptained: {
+      player: getPlayerName(bootstrap.elements, parseInt(mostCaptainedId)),
+      times: mostCaptainedTimes,
+    },
   };
 
   // -------------------------
@@ -292,11 +319,10 @@ export default async function fetchWrappedData(teamId) {
   // -------------------------
   const totalMade = currentGWs.reduce((sum, gw) => sum + gw.event_transfers, 0);
   const totalHits = currentGWs.reduce(
-    (sum, gw) =>
-      gw.event_transfers_cost < 0 ? sum + Math.abs(gw.event_transfers_cost) / 4 : sum,
+    (sum, gw) => (gw.event_transfers_cost > 0 ? sum + gw.event_transfers_cost / 4 : sum),
     0
   );
-  const netPoints = currentGWs.reduce((sum, gw) => sum + gw.event_transfers_cost, 0);
+  const netPoints = -currentGWs.reduce((sum, gw) => sum + gw.event_transfers_cost, 0);
 
   const inCounts = {};
   const outCounts = {};
@@ -320,6 +346,8 @@ export default async function fetchWrappedData(teamId) {
   // -------------------------
   // Chips
   // -------------------------
+  // history.chips contains one entry per chip play — including both wildcard uses.
+  // No deduplication: all 8 possible plays are preserved as-is.
   const chips = history.chips.map((chip) => {
     const gwHistory = currentGWs.find((gw) => gw.event === chip.event);
     const event = bootstrap.events.find((e) => e.id === chip.event);

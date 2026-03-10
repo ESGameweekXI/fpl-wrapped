@@ -26,7 +26,7 @@ function HitRateBar({ hitRate }) {
         />
       </div>
       <p className="font-[family-name:var(--font-mono)] text-[var(--faded-ink)] text-[0.5rem] uppercase tracking-widest">
-        Gameweeks where captain was optimal choice
+        Weeks you picked your squad&apos;s top scorer as captain
       </p>
     </div>
   );
@@ -39,7 +39,8 @@ function HitRateBar({ hitRate }) {
 export default function CaptaincySlide({ captaincy }) {
   if (!captaincy) return null;
 
-  const { totalCaptainPoints, missedPoints, hitRate, bestCaptain, worstCaptain } = captaincy;
+  const { totalCaptainPoints, missedPoints, hitRate, bestCaptain, worstCaptain, mostCaptained } =
+    captaincy;
 
   return (
     <div className="relative flex flex-col bg-[var(--cream)] min-h-[70vh] p-6 overflow-hidden select-none gap-4">
@@ -72,16 +73,17 @@ export default function CaptaincySlide({ captaincy }) {
             {totalCaptainPoints.toLocaleString()}
           </p>
         </div>
-        {/* Missed points aside */}
+
+        {/* Optimal gap aside */}
         <div className="border-2 border-[var(--red)] px-3 py-2 text-right shrink-0">
           <p className="font-[family-name:var(--font-mono)] text-[var(--red)] text-[0.5rem] uppercase tracking-widest">
-            Left behind
+            Optimal Gap
           </p>
           <p className="font-[family-name:var(--font-display)] text-[var(--red)] text-2xl leading-none">
             -{missedPoints}
           </p>
           <p className="font-[family-name:var(--font-mono)] text-[var(--faded-ink)] text-[0.45rem] uppercase tracking-widest">
-            pts missed
+            vs picking optimal captain in your team
           </p>
         </div>
       </div>
@@ -103,6 +105,28 @@ export default function CaptaincySlide({ captaincy }) {
         </div>
         <GWBadge gw={bestCaptain.gw} />
       </div>
+
+      {/* ── MOST CAPTAINED ── */}
+      {mostCaptained && (
+        <div className="relative z-10 flex items-center justify-between gap-3">
+          <div className="flex-1">
+            <p className="font-[family-name:var(--font-mono)] text-[var(--faded-ink)] text-[0.5rem] uppercase tracking-widest mb-0.5">
+              Most Captained
+            </p>
+            <p className="font-[family-name:var(--font-display)] text-[var(--black)] text-2xl leading-none tracking-wide truncate">
+              {mostCaptained.player}
+            </p>
+          </div>
+          <div className="border-2 border-[var(--black)] px-3 py-1 text-center shrink-0">
+            <p className="font-[family-name:var(--font-display)] text-[var(--black)] text-2xl leading-none">
+              ×{mostCaptained.times}
+            </p>
+            <p className="font-[family-name:var(--font-mono)] text-[var(--faded-ink)] text-[0.45rem] uppercase tracking-widest">
+              times
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── WORST CAPTAIN ── */}
       <div className="relative z-10 flex items-center justify-between gap-3">

@@ -13,6 +13,11 @@
   --font-display: "Bebas Neue", sans-serif;
   --font-mono:    "IBM Plex Mono", monospace;
   --font-stamp:   "Special Elite", cursive;
+  --font-brand:   "Sora", sans-serif;
+
+  --gw-teal:     #00FFC2;
+  --gw-dark:     #021A16;
+  --gw-teal-dim: #00EFB6;
 }
 
 /* ─── Paper Grain Filter ────────────────────────────────────── */
